@@ -80,11 +80,11 @@ public class Main {
 
             for (Solution option : options) {
                 if (isSolutionSalts(option)) {
-                    //bestSalts = min(option, bestSalts);
+                    bestSalts = min(option, bestSalts);
                 } else if (isPromisingSalts(option)) {
                     liveNodesSalts.add(option);
                 } else if (isSolutionFiabilitat(option)) {
-                    //bestFiabilitat = max(option, bestFiabilitat);
+                    bestFiabilitat = max(option, bestFiabilitat);
                 } else if (isPromisingFiabilitat(option)) {
                     liveNodesFiabilitat.add(option);
                 }
@@ -92,5 +92,21 @@ public class Main {
         }
 
         return new Solution[] {bestSalts, bestFiabilitat};
+    }
+
+    public Solution max(Solution o1, Solution o2) {
+        if (o1.getCost() > o2.getCost()) {
+            return o1;
+        } else {
+            return o2;
+        }
+    }
+
+    public Solution min(Solution o1, Solution o2) {
+        if (o1.getCost() > o2.getCost()) {
+            return o2;
+        } else {
+            return o1;
+        }
     }
 }
