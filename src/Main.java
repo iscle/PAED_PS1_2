@@ -29,18 +29,14 @@ public class Main {
                 case 1: // Backtracking
                     Backtracking bt = new Backtracking(nodes, servers, users);
 
-                    System.out.println(bt.salts(2, new Solution(nodes[0], true), null).getBound());
-                    Solution solCost = bt.salts(2, new Solution(nodes[0], false), null);
-                    System.out.println(solCost.getBound());
-                    System.out.println(solCost.getPath().size());
+                    System.out.println(bt.fiabilitat(2, new Solution(nodes[0], true), null).getBound());
+                    System.out.println(bt.salts(2, new Solution(nodes[0], false), null).getBound());
                     break;
                 case 2: // Branch & Bound
                     BranchAndBound bnb = new BranchAndBound(nodes, servers, users);
 
                     System.out.println(bnb.fiabilitat(1, 2).getBound());
-                    Solution solCost1 = bnb.salts(1, 2);
-                    System.out.println(solCost1.getBound());
-                    System.out.println(solCost1.getPath().size());
+                    System.out.println(bnb.salts(1, 2).getBound());
                     break;
                 case 3: // Greedy
                     break;
