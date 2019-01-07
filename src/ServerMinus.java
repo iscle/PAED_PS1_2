@@ -1,10 +1,10 @@
-public class ServerPlus {
+public class ServerMinus {
     private int id;
     private String country;
     private double[] location;
-    private int[] reachable_from;
+    private int reachable_from;
 
-    public ServerPlus(int id, String country, double[] location, int[] reachable_from) {
+    public ServerMinus(int id, String country, double[] location, int reachable_from) {
         this.id = id;
         this.country = country;
         this.location = location;
@@ -35,11 +35,11 @@ public class ServerPlus {
         this.location = location;
     }
 
-    public int[] getReachable_from() {
+    public int getReachable_from() {
         return reachable_from;
     }
 
-    public void setReachable_from(int[] reachable_from) {
+    public void setReachable_from(int reachable_from) {
         this.reachable_from = reachable_from;
     }
 }

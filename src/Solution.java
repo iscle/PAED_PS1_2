@@ -39,10 +39,22 @@ public class Solution {
         ++last;
     }
 
-    public void addNode(Node node, double cost) {
+    public void addNode(Node node, int cost) {
         path.add(node);
         bound += cost;
         ++last;
+    }
+
+    public void removeNode() {
+        bound /= path.get(last).getReliability();
+        path.remove(last);
+        --last;
+    }
+
+    public void removeNode(double cost) {
+        bound -= cost;
+        path.remove(last);
+        --last;
     }
 
     public Node getLast() {
@@ -54,12 +66,6 @@ public class Solution {
     }
 
     public boolean isVisited(Node n) {
-        for (Node node:path) {
-            if (n == node) {
-                return true;
-            }
-        }
-
-        return false;
+        return path.contains(n);
     }
 }
