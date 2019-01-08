@@ -39,6 +39,10 @@ public class Main {
                     System.out.println(bnb.salts(1, 2).getBound());
                     break;
                 case 3: // Greedy
+                    Greedy g = new Greedy(nodes, servers, users);
+
+                    System.out.println(g.fiabilitat(1, 2).getBound());
+                    //System.out.println(g.salts(1, 2).getBound());
                     break;
                 case 4: // Greedy + Backtracking
                     break;
