@@ -14,9 +14,8 @@ public class BranchAndBound {
         this.users = users;
     }
 
-    public Solution salts(int start, int end) {
+    public Solution salts(int start, int end, Solution best) {
         Solution x;
-        Solution best = null;
         PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, new Comparator<Solution>() {
             @Override
             public int compare(Solution o1, Solution o2) {
@@ -44,9 +43,8 @@ public class BranchAndBound {
         return best;
     }
 
-    public Solution fiabilitat(int start, int end) {
+    public Solution fiabilitat(int start, int end, Solution best) {
         Solution x;
-        Solution best = null;
         PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, new Comparator<Solution>() {
             @Override
             public int compare(Solution o1, Solution o2) {

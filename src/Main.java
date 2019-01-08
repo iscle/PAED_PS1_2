@@ -27,31 +27,69 @@ public class Main {
         while (true) {
             switch (getOption()) {
                 case 1: // Backtracking
-                    Backtracking bt = new Backtracking(nodes, servers, users);
-
-                    System.out.println(bt.fiabilitat(2, new Solution(nodes[0], true), null).getBound());
-                    System.out.println(bt.salts(2, new Solution(nodes[0], false), null).getBound());
+                    bt();
                     break;
                 case 2: // Branch & Bound
-                    BranchAndBound bnb = new BranchAndBound(nodes, servers, users);
-
-                    System.out.println(bnb.fiabilitat(1, 2).getBound());
-                    System.out.println(bnb.salts(1, 2).getBound());
+                    bnb();
                     break;
                 case 3: // Greedy
-                    Greedy g = new Greedy(nodes, servers, users);
-
-                    System.out.println(g.fiabilitat(1, 2).getBound());
-                    //System.out.println(g.salts(1, 2).getBound());
+                    g();
                     break;
                 case 4: // Greedy + Backtracking
+                    gbt();
                     break;
                 case 5: // Greedy + Branch & Bound
+                    gbnb();
                     break;
                 case 6:
                     return;
             }
         }
+    }
+
+    private static void bt() {
+        Backtracking bt = new Backtracking(nodes, servers, users);
+
+        System.out.println(bt.fiabilitat(2, new Solution(nodes[0], true), null).getBound());
+        System.out.println(bt.salts(2, new Solution(nodes[0], false), null).getBound());
+    }
+
+    private static void bnb() {
+        BranchAndBound bnb = new BranchAndBound(nodes, servers, users);
+
+        System.out.println(bnb.fiabilitat(1, 2, null).getBound());
+        System.out.println(bnb.salts(1, 2, null).getBound());
+    }
+
+    private static void g() {
+        Greedy g = new Greedy(nodes, servers, users);
+
+        System.out.println(g.fiabilitat(1, 2).getBound());
+        //System.out.println(g.salts(1, 2).getBound());
+    }
+
+    private static void gbt() {
+        Greedy g = new Greedy(nodes, servers, users);
+
+        Solution solFiabilitat = g.fiabilitat(1, 2);
+        //System.out.println(g.salts(1, 2).getBound());
+
+        Backtracking bt = new Backtracking(nodes, servers, users);
+
+        System.out.println(bt.fiabilitat(2, new Solution(nodes[0], true), solFiabilitat).getBound());
+        //System.out.println(bt.salts(2, new Solution(nodes[0], false), null).getBound());
+    }
+
+    private static void gbnb() {
+        Greedy g = new Greedy(nodes, servers, users);
+
+        Solution solFiabilitat = g.fiabilitat(1, 2);
+        //System.out.println(g.salts(1, 2).getBound());
+
+        BranchAndBound bnb = new BranchAndBound(nodes, servers, users);
+
+        System.out.println(bnb.fiabilitat(1, 2, solFiabilitat).getBound());
+        //System.out.println(bnb.salts(1, 2, null).getBound());
     }
 
     private static int getOption() {
