@@ -14,8 +14,7 @@ public class BranchAndBound {
         this.users = users;
     }
 
-    public Solution salts(int start, int end, Solution best) {
-        Solution x;
+    public Solution salts(int startServer, int endServer, Solution best) {
         PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, new Comparator<Solution>() {
             @Override
             public int compare(Solution o1, Solution o2) {
@@ -24,7 +23,16 @@ public class BranchAndBound {
         });
         ArrayList<Solution> options;
 
-        x = new Solution(getNodeById(start), false);
+        Server server = getServerById(startServer);
+        NodeConnection[] startNodeConnections = new NodeConnection[server.getReachable_from().length];
+
+        for (int i = 0; i < startNodeConnections.length; ++i) {
+            startNodeConnections[i] = new NodeConnection(server.getReachable_from()[i], "", 0);
+        }
+
+        Solution x = new Solution(new Node(-1, 1, startNodeConnections), false);
+        int[] end = getEndNodes(endServer);
+
         liveNodes.add(x);
 
         while (liveNodes.size() > 0) {
@@ -43,8 +51,28 @@ public class BranchAndBound {
         return best;
     }
 
-    public Solution fiabilitat(int start, int end, Solution best) {
-        Solution x;
+    private int[] getEndNodes(int endServer) {
+        Server server = getServerById(endServer);
+        int[] end = new int[server.getReachable_from().length];
+
+        for (int i = 0; i < server.getReachable_from().length; ++i) {
+            end[i] = server.getReachable_from()[i];
+        }
+
+        return end;
+    }
+
+    private boolean isSolution(int end[], Solution option) {
+        for (int i:end) {
+            if (i == option.getLast().getId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Solution fiabilitat(int startServer, int endServer, Solution best) {
         PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, new Comparator<Solution>() {
             @Override
             public int compare(Solution o1, Solution o2) {
@@ -53,7 +81,16 @@ public class BranchAndBound {
         });
         ArrayList<Solution> options;
 
-        x = new Solution(getNodeById(start), true);
+        Server server = getServerById(startServer);
+        NodeConnection[] startNodeConnections = new NodeConnection[server.getReachable_from().length];
+
+        for (int i = 0; i < startNodeConnections.length; ++i) {
+            startNodeConnections[i] = new NodeConnection(server.getReachable_from()[i], "", 0);
+        }
+
+        Solution x = new Solution(new Node(-1, 1, startNodeConnections), true);
+        int[] end = getEndNodes(endServer);
+
         liveNodes.add(x);
 
         while (liveNodes.size() > 0) {
@@ -142,7 +179,7 @@ public class BranchAndBound {
         }
     }
 
-    public Node getNodeById(int id) {
+    private Node getNodeById(int id) {
         for (Node n:nodes) {
             if (n.getId() == id) {
                 return n;
@@ -151,4 +188,15 @@ public class BranchAndBound {
 
         return null;
     }
+
+    private Server getServerById(int id) {
+        for (Server s:servers) {
+            if (s.getId() == id) {
+                return s;
+            }
+        }
+
+        return null;
+    }
+
 }

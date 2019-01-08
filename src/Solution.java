@@ -58,6 +58,10 @@ public class Solution {
     }
 
     public Node getLast() {
+        if (last == -1) {
+            return null;
+        }
+
         return path.get(last);
     }
 
