@@ -1,4 +1,4 @@
-public class User {
+class User {
     private String username;
     private int followers;
     private int follows;

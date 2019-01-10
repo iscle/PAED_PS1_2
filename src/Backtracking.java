@@ -1,13 +1,11 @@
-public class Backtracking {
+class Backtracking {
 
-    private Node[] nodes;
-    private Server[] servers;
-    private User[] users;
+    private final Node[] nodes;
+    private final Server[] servers;
 
-    public Backtracking(Node[] nodes, Server[] servers, User[] users) {
+    public Backtracking(Node[] nodes, Server[] servers) {
         this.nodes = nodes;
         this.servers = servers;
-        this.users = users;
     }
 
     public Solution cost(int startServer, int endServer, Solution s, Solution best, int[] end) {
@@ -33,7 +31,7 @@ public class Backtracking {
 
             for (NodeConnection opt:lastNode.getConnectsTo()) {
                 Node node = getNodeById(opt.getTo());
-                if (!s.isVisited(node)) {
+                if (s.isNotVisited(node)) {
                     if (isPromising(s, opt, node, best)) {
                         s.addNode(node, opt.getCost());
                         best = cost(startServer, endServer, s, best, end);
@@ -89,7 +87,7 @@ public class Backtracking {
         } else {
             for (NodeConnection opt:s.getLast().getConnectsTo()) {
                 Node node = getNodeById(opt.getTo());
-                if (!s.isVisited(node)) {
+                if (s.isNotVisited(node)) {
                     if (isPromising(s, opt, node, best)) {
                         s.addNode(node);
                         best = fiabilitat(startServer, endServer, s, best, end);

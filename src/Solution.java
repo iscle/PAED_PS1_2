@@ -1,10 +1,10 @@
 import java.util.ArrayList;
 
 public class Solution {
-    private ArrayList<Node> path;
+    private final ArrayList<Node> path;
     private int last;
     private double bound;
-    private boolean isReliability;
+    private final boolean isReliability;
 
     public Solution(Node node, boolean isReliability) {
         this.path = new ArrayList<>();
@@ -69,7 +69,7 @@ public class Solution {
         return isReliability;
     }
 
-    public boolean isVisited(Node n) {
-        return path.contains(n);
+    public boolean isNotVisited(Node n) {
+        return !path.contains(n);
     }
 }

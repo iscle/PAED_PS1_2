@@ -2,28 +2,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class Greedy {
+class Greedy {
 
-    private Node[] nodes;
-    private Server[] servers;
-    private User[] users;
+    private final Node[] nodes;
+    private final Server[] servers;
 
-    public Greedy(Node[] nodes, Server[] servers, User[] users) {
+    public Greedy(Node[] nodes, Server[] servers) {
         this.nodes = nodes;
         this.servers = servers;
-        this.users = users;
     }
 
     public Solution fiabilitat(int start, int end) {
         Solution s = new Solution(getNodeById(start), true);
         Node[] sortedNodes = nodes.clone();
 
-        Arrays.sort(sortedNodes, new Comparator<Node>() {
-            @Override
-            public int compare(Node o1, Node o2) {
-                return Double.compare(o2.getReliability(), o1.getReliability());
-            }
-        });
+        // mirem tots els nodes amb els que connecta lultim node, si es el final, anem directament, sino fem greedy
+
+        Arrays.sort(sortedNodes, (o1, o2) -> Double.compare(o2.getReliability(), o1.getReliability()));
 
         ArrayList<Node> candidats = new ArrayList<>(Arrays.asList(sortedNodes));
 

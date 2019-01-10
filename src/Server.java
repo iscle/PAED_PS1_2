@@ -1,4 +1,4 @@
-public class Server {
+class Server {
     private int id;
     private String country;
     private double[] location;

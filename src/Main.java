@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Scanner;
 
-public class Main {
+class Main {
 
     private static Node[] nodes;
     private static Server[] servers;
@@ -48,45 +48,50 @@ public class Main {
     }
 
     private static void bt() {
-        Backtracking bt = new Backtracking(nodes, servers, users);
+        Backtracking bt = new Backtracking(nodes, servers);
 
-        System.out.println(bt.fiabilitat( 1,2, null, null, null).getBound());
-        System.out.println(bt.cost(1, 2, null, null, null).getBound());
+        System.out.println(bt.fiabilitat( 1,5, null, null, null).getBound());
+        System.out.println(bt.cost(1, 5, null, null, null).getBound());
     }
 
     private static void bnb() {
-        BranchAndBound bnb = new BranchAndBound(nodes, servers, users);
+        BranchAndBound bnb = new BranchAndBound(nodes, servers);
 
-        System.out.println(bnb.fiabilitat(1, 2, null).getBound());
-        System.out.println(bnb.salts(1, 2, null).getBound());
+        System.out.println(bnb.fiabilitat(1, 5, null).getBound());
+        System.out.println(bnb.salts(1, 5, null).getBound());
     }
 
     private static void g() {
-        Greedy g = new Greedy(nodes, servers, users);
+        Greedy g = new Greedy(nodes, servers);
 
-        System.out.println(g.fiabilitat(1, 2).getBound());
+        Solution s = g.fiabilitat(1, 3);
+        if (s == null) {
+            System.out.println("No s'ha trobat cap solucio.");
+        } else {
+            System.out.println(s.getBound());
+        }
         //System.out.println(g.cost(1, 2).getBound());
     }
 
     private static void gbt() {
-        Greedy g = new Greedy(nodes, servers, users);
+        Greedy g = new Greedy(nodes, servers);
 
         Solution solFiabilitat = g.fiabilitat(1, 2);
         //System.out.println(g.cost(1, 2).getBound());
 
-        Backtracking bt = new Backtracking(nodes, servers, users);
+        Backtracking bt = new Backtracking(nodes, servers);
 
         System.out.println(bt.fiabilitat(1, 2, null, solFiabilitat, null).getBound());
         //System.out.println(bt.cost(2, new Solution(nodes[0], false), null).getBound());
     }
 
     private static void gbnb() {
-        Greedy g = new Greedy(nodes, servers, users);
+        Greedy g = new Greedy(nodes, servers);
 
         Solution solFiabilitat = g.fiabilitat(1, 2);
         //System.out.println(g.cost(1, 2).getBound());
 
-        BranchAndBound bnb = new BranchAndBound(nodes, servers, users);
+        BranchAndBound bnb = new BranchAndBound(nodes, servers);
 
         System.out.println(bnb.fiabilitat(1, 2, solFiabilitat).getBound());
         //System.out.println(bnb.cost(1, 2, null).getBound());

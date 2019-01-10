@@ -2,25 +2,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-public class BranchAndBound {
+class BranchAndBound {
 
-    private Node[] nodes;
-    private Server[] servers;
-    private User[] users;
+    private final Node[] nodes;
+    private final Server[] servers;
 
-    public BranchAndBound(Node[] nodes, Server[] servers, User[] users) {
+    public BranchAndBound(Node[] nodes, Server[] servers) {
         this.nodes = nodes;
         this.servers = servers;
-        this.users = users;
     }
 
     public Solution salts(int startServer, int endServer, Solution best) {
-        PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, new Comparator<Solution>() {
-            @Override
-            public int compare(Solution o1, Solution o2) {
-                return Double.compare(o1.getBound(), o2.getBound());
-            }
-        });
+        PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getBound(), o2.getBound()));
         ArrayList<Solution> options;
 
         Server server = getServerById(startServer);
@@ -73,12 +66,7 @@ public class BranchAndBound {
     }
 
     public Solution fiabilitat(int startServer, int endServer, Solution best) {
-        PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, new Comparator<Solution>() {
-            @Override
-            public int compare(Solution o1, Solution o2) {
-                return Double.compare(o2.getBound(), o1.getBound());
-            }
-        });
+        PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o2.getBound(), o1.getBound()));
         ArrayList<Solution> options;
 
         Server server = getServerById(startServer);
@@ -115,7 +103,7 @@ public class BranchAndBound {
 
         for (NodeConnection nc:x.getLast().getConnectsTo()) {
             Node node = getNodeById(nc.getTo());
-            if (!x.isVisited(node)) {
+            if (x.isNotVisited(node)) {
                 s = new Solution(x);
                 if (s.isReliability()) {
                     s.addNode(node);
