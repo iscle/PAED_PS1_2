@@ -69,10 +69,34 @@ class Greedy {
         return null;
     }
 
-    public Solution salts(int end, Solution s, Solution best) {
+    public Solution cost() {
+        Solution s = new Solution(startServer, false);
 
+        ArrayList<NodeConnection> candidats = null;
+        Node lastNode = null;
 
-        return best;
+        do {
+            if (lastNode != s.getLast()) {
+                NodeConnection[] sortedConnections = s.getLast().getConnectsTo();
+                Arrays.sort(sortedConnections, (o1, o2) -> Integer.compare(o1.getCost(), o2.getCost()));
+                candidats = new ArrayList<>(Arrays.asList(sortedConnections));
+            }
+
+            lastNode = s.getLast();
+
+            Node c = getNodeById(candidats.get(0).getTo());
+
+            if (s.isNotVisited(c)) {
+                s.addNode(c, candidats.get(0).getCost());
+                if (isSolution(s)) {
+                    return s;
+                }
+            } else {
+                candidats.remove(0);
+            }
+        } while (candidats.size() > 0);
+
+        return null;
     }
 
     private boolean esFactible(Solution s, Node c) {

@@ -66,7 +66,7 @@ class Main {
     }
 
     private static void bnb() {
-        BranchAndBound bnb = new BranchAndBound(nodes, servers, 1, 5);
+        BranchAndBound bnb = new BranchAndBound(nodes, servers, 3, 4);
 
         Solution s = bnb.fiabilitat(null);
         System.out.println(s.getBound());
@@ -96,7 +96,17 @@ class Main {
                 System.out.println(n.getId());
             }
         }
-        //System.out.println(g.cost(1, 2).getBound());
+
+        Solution s2 = g.cost();
+        if (s2 == null) {
+            System.out.println("No s'ha trobat cap solucio.");
+        } else {
+            System.out.println(s2.getBound());
+            System.out.println("kk");
+            for (Node n : s2.getPath()) {
+                System.out.println(n.getId());
+            }
+        }
     }
 
     private static void gbt() {
