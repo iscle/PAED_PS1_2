@@ -48,52 +48,78 @@ class Main {
     }
 
     private static void bt() {
-        Backtracking bt = new Backtracking(nodes, servers);
+        Backtracking bt = new Backtracking(nodes, servers, 1, 4);
 
-        System.out.println(bt.fiabilitat( 1,5, null, null, null).getBound());
-        System.out.println(bt.cost(1, 5, null, null, null).getBound());
+        Solution s = bt.fiabilitat(null, null);
+        System.out.println(s.getBound());
+        System.out.println("kk");
+        for (Node n : s.getPath()) {
+            System.out.println(n.getId());
+        }
+
+        Solution s2 = bt.cost(null, null);
+        System.out.println(s2.getBound());
+        System.out.println("kk");
+        for (Node n : s2.getPath()) {
+            System.out.println(n.getId());
+        }
     }
 
     private static void bnb() {
-        BranchAndBound bnb = new BranchAndBound(nodes, servers);
+        BranchAndBound bnb = new BranchAndBound(nodes, servers, 1, 5);
 
-        System.out.println(bnb.fiabilitat(1, 5, null).getBound());
-        System.out.println(bnb.salts(1, 5, null).getBound());
+        Solution s = bnb.fiabilitat(null);
+        System.out.println(s.getBound());
+        System.out.println("kk");
+        for (Node n : s.getPath()) {
+            System.out.println(n.getId());
+        }
+
+        Solution s2 = bnb.cost(null);
+        System.out.println(s2.getBound());
+        System.out.println("kk");
+        for (Node n : s2.getPath()) {
+            System.out.println(n.getId());
+        }
     }
 
     private static void g() {
-        Greedy g = new Greedy(nodes, servers);
+        Greedy g = new Greedy(nodes, servers, 1, 5);
 
-        Solution s = g.fiabilitat(1, 3);
+        Solution s = g.fiabilitat();
         if (s == null) {
             System.out.println("No s'ha trobat cap solucio.");
         } else {
             System.out.println(s.getBound());
+            System.out.println("kk");
+            for (Node n : s.getPath()) {
+                System.out.println(n.getId());
+            }
         }
         //System.out.println(g.cost(1, 2).getBound());
     }
 
     private static void gbt() {
-        Greedy g = new Greedy(nodes, servers);
+        Greedy g = new Greedy(nodes, servers, 1, 5);
 
-        Solution solFiabilitat = g.fiabilitat(1, 2);
+        //Solution solFiabilitat = g.fiabilitat(1, 2);
         //System.out.println(g.cost(1, 2).getBound());
 
-        Backtracking bt = new Backtracking(nodes, servers);
+        //Backtracking bt = new Backtracking(nodes, servers);
 
-        System.out.println(bt.fiabilitat(1, 2, null, solFiabilitat, null).getBound());
+        //System.out.println(bt.fiabilitat(1, 2, null, solFiabilitat, null).getBound());
         //System.out.println(bt.cost(2, new Solution(nodes[0], false), null).getBound());
     }
 
     private static void gbnb() {
-        Greedy g = new Greedy(nodes, servers);
+        //Greedy g = new Greedy(nodes, servers);
 
-        Solution solFiabilitat = g.fiabilitat(1, 2);
+        //Solution solFiabilitat = g.fiabilitat(1, 2);
         //System.out.println(g.cost(1, 2).getBound());
 
-        BranchAndBound bnb = new BranchAndBound(nodes, servers);
+        //BranchAndBound bnb = new BranchAndBound(nodes, servers);
 
-        System.out.println(bnb.fiabilitat(1, 2, solFiabilitat).getBound());
+        //System.out.println(bnb.fiabilitat(1, 2, solFiabilitat).getBound());
         //System.out.println(bnb.cost(1, 2, null).getBound());
     }
 

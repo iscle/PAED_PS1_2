@@ -1,30 +1,54 @@
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.PriorityQueue;
 
 class BranchAndBound {
 
-    private final Node[] nodes;
-    private final Server[] servers;
+    private final ArrayList<Node> nodes;
+    private final Node startServer;
+    private final Node endServer;
 
-    public BranchAndBound(Node[] nodes, Server[] servers) {
-        this.nodes = nodes;
-        this.servers = servers;
+    public BranchAndBound(Node[] nodes, Server[] servers, int startServer, int endServer) {
+        this.nodes = new ArrayList<>(Arrays.asList(nodes));
+
+        // Convert server1 to node
+        Server server1 = getServerById(servers, startServer);
+        NodeConnection[] startNodeConnections = new NodeConnection[server1.getReachable_from().length];
+
+        for (int i = 0; i < startNodeConnections.length; ++i) {
+            startNodeConnections[i] = new NodeConnection(server1.getReachable_from()[i], "", 0);
+        }
+
+        this.startServer = new Node(-1, 1, startNodeConnections);
+
+        // Convert server2 to node
+        Server server2 = getServerById(servers, endServer);
+        NodeConnection[] endNodeConnections = new NodeConnection[server2.getReachable_from().length];
+
+        for (int i = 0; i < endNodeConnections.length; ++i) {
+            endNodeConnections[i] = new NodeConnection(server2.getReachable_from()[i], "", 0);
+            for (int j = 0; j < this.nodes.size(); ++j) {
+                Node n = this.nodes.get(j);
+                if (server2.getReachable_from()[i] == n.getId()) {
+                    NodeConnection[] tmp = n.getConnectsTo();
+                    tmp = Arrays.copyOf(tmp, tmp.length + 1);
+                    tmp[tmp.length - 1] = new NodeConnection(-2,"", 0);
+                    n.setConnectsTo(tmp);
+                    this.nodes.set(j, n);
+                }
+            }
+        }
+
+        this.endServer = new Node(-2, 1, endNodeConnections);
+
+        this.nodes.add(this.endServer);
     }
 
-    public Solution salts(int startServer, int endServer, Solution best) {
+    public Solution cost(Solution best) {
         PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getBound(), o2.getBound()));
         ArrayList<Solution> options;
 
-        Server server = getServerById(startServer);
-        NodeConnection[] startNodeConnections = new NodeConnection[server.getReachable_from().length];
-
-        for (int i = 0; i < startNodeConnections.length; ++i) {
-            startNodeConnections[i] = new NodeConnection(server.getReachable_from()[i], "", 0);
-        }
-
-        Solution x = new Solution(new Node(-1, 1, startNodeConnections), false);
-        int[] end = getEndNodes(endServer);
+        Solution x = new Solution(startServer, false);
 
         liveNodes.add(x);
 
@@ -33,7 +57,7 @@ class BranchAndBound {
             options = expand(x);
 
             for (Solution option:options) {
-                if (isSolution(end, option)) {
+                if (isSolution(option)) {
                     best = min(option, best);
                 } else if (isPromising(option, best)) {
                     liveNodes.add(option);
@@ -44,40 +68,15 @@ class BranchAndBound {
         return best;
     }
 
-    private int[] getEndNodes(int endServer) {
-        Server server = getServerById(endServer);
-        int[] end = new int[server.getReachable_from().length];
-
-        for (int i = 0; i < server.getReachable_from().length; ++i) {
-            end[i] = server.getReachable_from()[i];
-        }
-
-        return end;
+    private boolean isSolution(Solution option) {
+        return option.getLast() == endServer;
     }
 
-    private boolean isSolution(int end[], Solution option) {
-        for (int i:end) {
-            if (i == option.getLast().getId()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public Solution fiabilitat(int startServer, int endServer, Solution best) {
+    public Solution fiabilitat(Solution best) {
         PriorityQueue<Solution> liveNodes = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o2.getBound(), o1.getBound()));
         ArrayList<Solution> options;
 
-        Server server = getServerById(startServer);
-        NodeConnection[] startNodeConnections = new NodeConnection[server.getReachable_from().length];
-
-        for (int i = 0; i < startNodeConnections.length; ++i) {
-            startNodeConnections[i] = new NodeConnection(server.getReachable_from()[i], "", 0);
-        }
-
-        Solution x = new Solution(new Node(-1, 1, startNodeConnections), true);
-        int[] end = getEndNodes(endServer);
+        Solution x = new Solution(startServer, true);
 
         liveNodes.add(x);
 
@@ -86,7 +85,7 @@ class BranchAndBound {
             options = expand(x);
 
             for (Solution option:options) {
-                if (isSolution(end, option)) {
+                if (isSolution(option)) {
                     best = max(option, best);
                 } else if (isPromising(option, best)) {
                     liveNodes.add(option);
@@ -115,10 +114,6 @@ class BranchAndBound {
         }
 
         return solutions;
-    }
-
-    private boolean isSolution(int end, Solution option) {
-        return option.getLast().getId() == end;
     }
 
     private boolean isPromising(Solution option, Solution best) {
@@ -177,7 +172,7 @@ class BranchAndBound {
         return null;
     }
 
-    private Server getServerById(int id) {
+    private Server getServerById(Server[] servers, int id) {
         for (Server s:servers) {
             if (s.getId() == id) {
                 return s;

@@ -1,22 +1,51 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 
 class Greedy {
 
-    private final Node[] nodes;
-    private final Server[] servers;
+    private final ArrayList<Node> nodes;
+    private final Node startServer;
+    private final Node endServer;
 
-    public Greedy(Node[] nodes, Server[] servers) {
-        this.nodes = nodes;
-        this.servers = servers;
+    public Greedy(Node[] nodes, Server[] servers, int startServer, int endServer) {
+        this.nodes = new ArrayList<>(Arrays.asList(nodes));
+
+        // Convert server1 to node
+        Server server1 = getServerById(servers, startServer);
+        NodeConnection[] startNodeConnections = new NodeConnection[server1.getReachable_from().length];
+
+        for (int i = 0; i < startNodeConnections.length; ++i) {
+            startNodeConnections[i] = new NodeConnection(server1.getReachable_from()[i], "", 0);
+        }
+
+        this.startServer = new Node(-1, 1, startNodeConnections);
+
+        // Convert server2 to node
+        Server server2 = getServerById(servers, endServer);
+        NodeConnection[] endNodeConnections = new NodeConnection[server2.getReachable_from().length];
+
+        for (int i = 0; i < endNodeConnections.length; ++i) {
+            endNodeConnections[i] = new NodeConnection(server2.getReachable_from()[i], "", 0);
+            for (int j = 0; j < this.nodes.size(); ++j) {
+                Node n = this.nodes.get(j);
+                if (server2.getReachable_from()[i] == n.getId()) {
+                    NodeConnection[] tmp = n.getConnectsTo();
+                    tmp = Arrays.copyOf(tmp, tmp.length + 1);
+                    tmp[tmp.length - 1] = new NodeConnection(-2,"", 0);
+                    n.setConnectsTo(tmp);
+                    this.nodes.set(j, n);
+                }
+            }
+        }
+
+        this.endServer = new Node(-2, 1, endNodeConnections);
+
+        this.nodes.add(this.endServer);
     }
 
-    public Solution fiabilitat(int start, int end) {
-        Solution s = new Solution(getNodeById(start), true);
-        Node[] sortedNodes = nodes.clone();
-
-        // mirem tots els nodes amb els que connecta lultim node, si es el final, anem directament, sino fem greedy
+    public Solution fiabilitat() {
+        Solution s = new Solution(startServer, true);
+        Node[] sortedNodes = nodes.toArray(new Node[nodes.size()]);
 
         Arrays.sort(sortedNodes, (o1, o2) -> Double.compare(o2.getReliability(), o1.getReliability()));
 
@@ -28,7 +57,7 @@ class Greedy {
             if (esFactible(s, c)) {
                 s.addNode(c);
 
-                if (isSolution(end, s)) {
+                if (isSolution(s)) {
                     return s;
                 }
 
@@ -49,8 +78,8 @@ class Greedy {
     private boolean esFactible(Solution s, Node c) {
         Node lastNode = s.getLast();
 
-        for (NodeConnection nc:c.getConnectsTo()) {
-            if (lastNode.getId() == nc.getTo()) {
+        for (NodeConnection nc:lastNode.getConnectsTo()) {
+            if (c.getId() == nc.getTo()) {
                 return true;
             }
         }
@@ -58,8 +87,8 @@ class Greedy {
         return false;
     }
 
-    private boolean isSolution(int end, Solution option) {
-        return option.getLast().getId() == end;
+    private boolean isSolution(Solution option) {
+        return option.getLast() == endServer;
     }
 
     private Node getNodeById(int id) {
@@ -71,4 +100,15 @@ class Greedy {
 
         return null;
     }
+
+    private Server getServerById(Server[] servers, int id) {
+        for (Server s:servers) {
+            if (s.getId() == id) {
+                return s;
+            }
+        }
+
+        return null;
+    }
+
 }
