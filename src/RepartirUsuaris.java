@@ -15,6 +15,71 @@ public class RepartirUsuaris {
         }
     }
 
+    public UserSolution backtracking(UserSolution s, ArrayList<UserSolution> solutions, double[] minEquity, boolean getResult) {
+        if (s != null) {
+            s = new UserSolution(s);
+        } else {
+            s = new UserSolution(servers);
+        }
+
+        if (solutions == null) {
+            solutions = new ArrayList<>();
+        }
+
+        if (minEquity == null) {
+            minEquity = new double[] {-1};
+        }
+
+        if (isSolution(s)) {
+            if (isPromisingBt(s, minEquity[0])) {
+                solutions.add(s);
+
+                if (minEquity[0] == -1 || s.getEquity() < minEquity[0]) {
+                    minEquity[0] = s.getEquity();
+                }
+
+
+                for (int i = 0; i < solutions.size(); ++i) {
+                    if (!isPromisingBt(solutions.get(i), minEquity[0])) {
+                        solutions.remove(i);
+                        --i;
+                    }
+                }
+            }
+        } else {
+            User u = users[s.getTotalUsers()];
+            for (Server opt:s.getServers()) {
+                s.add(u, opt);
+                backtracking(s, solutions, minEquity, false);
+                s.remove(u, opt);
+            }
+        }
+
+        if (getResult) {
+            UserSolution best = null;
+            for (UserSolution us : solutions) {
+                if (best == null) {
+                    best = us;
+                } else {
+                    if (best.getDistTotal() > us.getDistTotal()) {
+                        best = us;
+                    }
+                }
+            }
+            return best;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean isPromisingBt(UserSolution option, double minEquity) {
+        if (minEquity == -1) {
+            return true;
+        } else {
+            return option.getEquity() <= minEquity * 1.1;
+        }
+    }
+
     UserSolution branchAndBound() {
         PriorityQueue<UserSolution> liveNodes = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getEquity(), o2.getEquity()));
         PriorityQueue<UserSolution> solutions = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getDistTotal(), o2.getDistTotal()));
@@ -29,14 +94,12 @@ public class RepartirUsuaris {
 
             for (UserSolution option : options) {
                 if (isSolution(option)) {
-                    if (minEquity == -1) {
+                    if (minEquity == -1 || minEquity > option.getEquity()) {
                         minEquity = option.getEquity();
-                    } else if (minEquity > option.getEquity()) {
-                            minEquity = option.getEquity();
                     }
 
                     solutions.add(option);
-                } else if (isPromising(option, minEquity)) {
+                } else if (isPromisingBnb(option, minEquity)) {
                     liveNodes.add(option);
                 }
             }
@@ -55,7 +118,7 @@ public class RepartirUsuaris {
         return option.getTotalUsers() == users.length;
     }
 
-    private boolean isPromising(UserSolution option, double minEquity) {
+    private boolean isPromisingBnb(UserSolution option, double minEquity) {
         if (minEquity == -1) {
             return true;
         } else {

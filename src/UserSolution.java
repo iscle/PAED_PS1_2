@@ -40,8 +40,8 @@ public class UserSolution {
         int indexOfServer = indexOfServer(server);
         --totalUsers;
         distTotal -= getDistance(servers[indexOfServer].getLocation()[0], servers[indexOfServer].getLocation()[1], user.getPosts()[0].getLocation()[0], user.getPosts()[0].getLocation()[1]);
-        equity = maxServer() - minServer();
         servers[indexOfServer].removeUser(user);
+        equity = maxServer() - minServer();
     }
 
     public double minServer() {
@@ -112,14 +112,6 @@ public class UserSolution {
 
     public Server[] getServers() {
         return servers;
-    }
-
-    public void setServers(Server[] servers) {
-        this.servers = servers;
-    }
-
-    public void setEquity(double equity) {
-        this.equity = equity;
     }
 
     public double getEquity() {

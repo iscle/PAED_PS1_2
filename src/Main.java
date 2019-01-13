@@ -4,7 +4,7 @@ import com.google.gson.JsonSyntaxException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Scanner;
+import java.util.*;
 
 class Main {
 
@@ -39,6 +39,17 @@ class Main {
         UserSolution s1 = ru.greedy();
         System.out.println("Greedy: Equity: " + s1.getEquity() + ", Distancia: " + s1.getDistTotal());
         for (Server sv:s1.getServers()) {
+            System.out.println("Server " + sv.getId() + ": " + sv.getLoad());
+            for (User u:sv.getUsers()) {
+                System.out.println("\t" + u.getUsername()+ ": " + u.getActivity());
+            }
+        }
+
+        System.out.println();
+
+        UserSolution s2 = ru.backtracking(null, null, null, true);
+        System.out.println("BT: Equity: " + s2.getEquity() + ", Distancia: " + s2.getDistTotal());
+        for (Server sv:s2.getServers()) {
             System.out.println("Server " + sv.getId() + ": " + sv.getLoad());
             for (User u:sv.getUsers()) {
                 System.out.println("\t" + u.getUsername()+ ": " + u.getActivity());
