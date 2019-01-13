@@ -64,9 +64,9 @@ class Main {
 
             bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
             for (Server s:us.getServers()) {
-                bw.write("Server " + s.getId() + ":\n");
+                bw.write("Server " + s.getId() + " (" + s.getActivity() + "):\n");
                 for (User u:s.getUsers()) {
-                    bw.write("\t" + u.getUsername() + "\n");
+                    bw.write("\t" + u.getUsername() + " (" + u.getActivity() + ")\n");
                 }
             }
 
@@ -127,9 +127,9 @@ class Main {
 
             bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
             for (Server s:us.getServers()) {
-                bw.write("Server " + s.getId() + ":\n");
+                bw.write("Server " + s.getId() + " (" + s.getActivity() + "):\n");
                 for (User u:s.getUsers()) {
-                    bw.write("\t" + u.getUsername() + "\n");
+                    bw.write("\t" + u.getUsername() + " (" + u.getActivity() + ")\n");
                 }
             }
 
@@ -189,9 +189,9 @@ class Main {
 
             bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
             for (Server s:us.getServers()) {
-                bw.write("Server " + s.getId() + ":\n");
+                bw.write("Server " + s.getId() + " (" + s.getActivity() + "):\n");
                 for (User u:s.getUsers()) {
-                    bw.write("\t" + u.getUsername() + "\n");
+                    bw.write("\t" + u.getUsername() + " (" + u.getActivity() + ")\n");
                 }
             }
 
@@ -262,9 +262,9 @@ class Main {
 
             bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
             for (Server s:us.getServers()) {
-                bw.write("Server " + s.getId() + ":\n");
+                bw.write("Server " + s.getId() + " (" + s.getActivity() + "):\n");
                 for (User u:s.getUsers()) {
-                    bw.write("\t" + u.getUsername() + "\n");
+                    bw.write("\t" + u.getUsername() + " (" + u.getActivity() + ")\n");
                 }
             }
 
@@ -325,12 +325,13 @@ class Main {
 
             long startTime = System.currentTimeMillis();
             UserSolution us = repartirUsuaris.greedy();
+            us = repartirUsuaris.branchAndBound(us.getEquity());
 
             bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
             for (Server s:us.getServers()) {
-                bw.write("Server " + s.getId() + ":\n");
+                bw.write("Server " + s.getId() + " (" + s.getActivity() + "):\n");
                 for (User u:s.getUsers()) {
-                    bw.write("\t" + u.getUsername() + "\n");
+                    bw.write("\t" + u.getUsername() + " (" + u.getActivity() + ")\n");
                 }
             }
 
