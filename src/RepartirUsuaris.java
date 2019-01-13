@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class RepartirUsuaris {
@@ -11,57 +10,71 @@ public class RepartirUsuaris {
         this.users = users.clone();
         for (User user : this.users) {
             Post[] posts = user.getPosts();
-            Arrays.sort(posts, new Comparator<Post>() {
-                @Override
-                public int compare(Post o1, Post o2) {
-                    return Long.compare(o2.getPublished(), o1.getPublished());
-                }
-            });
+            Arrays.sort(posts, (o1, o2) -> Long.compare(o2.getPublished(), o1.getPublished()));
             user.setPosts(posts);
         }
     }
 
-    /*
-
     UserSolution branchAndBound() {
         PriorityQueue<UserSolution> liveNodes = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getEquity(), o2.getEquity()));
-        Server[] servers = this.servers.clone();
-        UserSolution best = null;
-
-        UserSolution x = new UserSolution(users[0]);
+        PriorityQueue<UserSolution> solutions = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getDistTotal(), o2.getDistTotal()));
+        double minEquity = -1;
+        UserSolution x = new UserSolution(servers);
 
         liveNodes.add(x);
 
         while (liveNodes.size() > 0) {
             x = liveNodes.poll();
-            ArrayList<UserSolution> options = expand(servers, x);
+            ArrayList<UserSolution> options = expand(x);
 
-            for (Solution option:options) {
+            for (UserSolution option : options) {
                 if (isSolution(option)) {
-                    best = min(option, best);
-                } else if (isPromising(option, best)) {
+                    if (minEquity == -1) {
+                        minEquity = option.getEquity();
+                    } else if (minEquity > option.getEquity()) {
+                            minEquity = option.getEquity();
+                    }
+
+                    solutions.add(option);
+                } else if (isPromising(option, minEquity)) {
                     liveNodes.add(option);
                 }
             }
         }
 
-        return best;
+        for (UserSolution us:solutions) {
+            if (us.getEquity() <= minEquity * 1.1) {
+                return us;
+            }
+        }
+
+        return null;
     }
 
-    ArrayList<UserSolution> expand(Server[] servers, UserSolution us) {
+    private boolean isSolution(UserSolution option) {
+        return option.getTotalUsers() == users.length;
+    }
+
+    private boolean isPromising(UserSolution option, double minEquity) {
+        if (minEquity == -1) {
+            return true;
+        } else {
+            return option.getEquity() <= minEquity * 1.1;
+        }
+    }
+
+    ArrayList<UserSolution> expand(UserSolution us) {
         ArrayList<UserSolution> solutions = new ArrayList<>();
         UserSolution s;
 
-        for (Server sv:servers) {
+        for (Server sv:us.getServers()) {
             s = new UserSolution(us);
-            s.addNode(node, nc.getCost());
+            s.add(users[s.getTotalUsers()], sv);
             solutions.add(s);
         }
 
         return solutions;
-
     }
-    */
 
     UserSolution greedy() {
         User[] users = this.users.clone();

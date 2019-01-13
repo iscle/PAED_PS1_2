@@ -1,30 +1,31 @@
-import java.util.ArrayList;
-
 public class UserSolution {
-    Server[] servers;
-    double equity;
-    int distTotal;
-    User nextUser;
-
-    public UserSolution(Server[] servers, int equity, int distTotal, User nextUser) {
-        this.servers = servers;
-        this.equity = equity;
-        this.distTotal = distTotal;
-        this.nextUser = nextUser;
-    }
+    private Server[] servers;
+    private double equity;
+    private double distTotal;
+    private int totalUsers;
 
     public UserSolution(Server[] servers) {
-        this.servers = servers;
+        this.servers = cloneServerArray(servers);
         this.equity = 0;
         this.distTotal = 0;
-        this.nextUser = null;
+        this.totalUsers = 0;
     }
 
     public UserSolution(UserSolution u) {
-        this.servers = u.servers.clone();
+        this.servers = cloneServerArray(u.servers);
         this.equity = u.equity;
         this.distTotal = u.distTotal;
-        this.nextUser = u.nextUser;
+        this.totalUsers = u.totalUsers;
+    }
+
+    public Server[] cloneServerArray(Server[] servers) {
+        Server[] clone = new Server[servers.length];
+
+        for (int i = 0; i < servers.length; ++i) {
+            clone[i] = new Server(servers[i]);
+        }
+
+        return clone;
     }
 
     public void add(User user, Server server) {
@@ -32,12 +33,14 @@ public class UserSolution {
         servers[indexOfServer].addUser(user);
         equity = maxServer() - minServer();
         distTotal += getDistance(servers[indexOfServer].getLocation()[0], servers[indexOfServer].getLocation()[1], user.getPosts()[0].getLocation()[0], user.getPosts()[0].getLocation()[1]);
+        ++totalUsers;
     }
 
     public void remove(User user, Server server) {
         int indexOfServer = indexOfServer(server);
+        --totalUsers;
         distTotal -= getDistance(servers[indexOfServer].getLocation()[0], servers[indexOfServer].getLocation()[1], user.getPosts()[0].getLocation()[0], user.getPosts()[0].getLocation()[1]);
-        equity -= user.getActivity();
+        equity = maxServer() - minServer();
         servers[indexOfServer].removeUser(user);
     }
 
@@ -75,7 +78,7 @@ public class UserSolution {
 
     public int indexOfServer(Server s) {
         for (int i = 0; i < servers.length; ++i) {
-            if (servers[i] == s) {
+            if (servers[i].getId() == s.getId()) {
                 return i;
             }
         }
@@ -123,23 +126,11 @@ public class UserSolution {
         return equity;
     }
 
-    public void setEquity(int equity) {
-        this.equity = equity;
-    }
-
-    public int getDistTotal() {
+    public double getDistTotal() {
         return distTotal;
     }
 
-    public void setDistTotal(int distTotal) {
-        this.distTotal = distTotal;
-    }
-
-    public User getNextUser() {
-        return nextUser;
-    }
-
-    public void setNextUser(User nextUser) {
-        this.nextUser = nextUser;
+    public int getTotalUsers() {
+        return totalUsers;
     }
 }

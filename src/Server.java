@@ -15,6 +15,15 @@ class Server {
         this.reachable_from = reachable_from;
     }
 
+    public Server(Server s) {
+        this.id = s.id;
+        this.country = s.country;
+        this.location = s.location.clone();
+        this.reachable_from = s.reachable_from.clone();
+        this.activity = s.activity;
+        this.users = (ArrayList) s.users.clone();
+    }
+
     public int getId() {
         return id;
     }

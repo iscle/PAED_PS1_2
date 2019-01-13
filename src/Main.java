@@ -25,9 +25,20 @@ class Main {
         System.out.println("\tUsers: " + users.length);
 
         RepartirUsuaris ru = new RepartirUsuaris(servers, users);
-        UserSolution s = ru.greedy();
-        System.out.println(s.equity);
+        UserSolution s = ru.branchAndBound();
+        System.out.println("BNB: Equity: " + s.getEquity() + ", Distancia: " + s.getDistTotal());
         for (Server sv:s.getServers()) {
+            System.out.println("Server " + sv.getId() + ": " + sv.getLoad());
+            for (User u:sv.getUsers()) {
+                System.out.println("\t" + u.getUsername()+ ": " + u.getActivity());
+            }
+        }
+
+        System.out.println();
+
+        UserSolution s1 = ru.greedy();
+        System.out.println("Greedy: Equity: " + s1.getEquity() + ", Distancia: " + s1.getDistTotal());
+        for (Server sv:s1.getServers()) {
             System.out.println("Server " + sv.getId() + ": " + sv.getLoad());
             for (User u:sv.getUsers()) {
                 System.out.println("\t" + u.getUsername()+ ": " + u.getActivity());
