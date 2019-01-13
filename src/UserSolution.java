@@ -125,4 +125,8 @@ public class UserSolution {
     public int getTotalUsers() {
         return totalUsers;
     }
+
+    public void setServers(Server[] servers) {
+        this.servers = servers;
+    }
 }

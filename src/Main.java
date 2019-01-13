@@ -186,6 +186,14 @@ class Main {
 
             long startTime = System.currentTimeMillis();
             UserSolution us = repartirUsuaris.greedy();
+            Server[] stmp = us.getServers();
+            Arrays.sort(stmp, new Comparator<Server>() {
+                @Override
+                public int compare(Server o1, Server o2) {
+                    return Integer.compare(o1.getId(), o2.getId());
+                }
+            });
+            us.setServers(stmp);
 
             bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
             for (Server s:us.getServers()) {
