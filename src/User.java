@@ -39,10 +39,6 @@ class User {
         this.follows = follows;
     }
 
-    public double getActivity() {
-        return activity;
-    }
-
     public void setActivity(double activity) {
         this.activity = activity;
     }
@@ -53,6 +49,10 @@ class User {
 
     public void setConnections(UserConnection[] connections) {
         this.connections = connections;
+    }
+
+    public double getActivity() {
+        return activity;
     }
 
     public Post[] getPosts() {

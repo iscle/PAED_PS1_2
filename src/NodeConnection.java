@@ -9,6 +9,12 @@ public class NodeConnection {
         this.cost = cost;
     }
 
+    public NodeConnection(NodeConnection nc) {
+        this.to = nc.to;
+        this.name = nc.name;
+        this.cost = nc.cost;
+    }
+
     public int getTo() {
         return to;
     }

@@ -10,6 +10,15 @@ public class Node {
         this.connectsTo = connectsTo;
     }
 
+    public Node(Node n) {
+        this.id = n.id;
+        this.reliability = n.reliability;
+        this.connectsTo = new NodeConnection[n.connectsTo.length];
+        for (int i = 0; i < n.connectsTo.length; ++i) {
+            this.connectsTo[i] = new NodeConnection(n.connectsTo[i]);
+        }
+    }
+
     public int getId() {
         return id;
     }

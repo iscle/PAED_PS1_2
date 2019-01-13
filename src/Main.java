@@ -1,9 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.util.*;
 
 class Main {
@@ -11,6 +9,8 @@ class Main {
     private static Node[] nodes;
     private static Server[] servers;
     private static User[] users;
+    private static RepartirUsuaris repartirUsuaris;
+    private static int[] serverIds;
 
     public static void main(String[] args) {
         System.out.println("Reading JSON...");
@@ -24,39 +24,10 @@ class Main {
         System.out.println("\tServers: " + servers.length);
         System.out.println("\tUsers: " + users.length);
 
-        RepartirUsuaris ru = new RepartirUsuaris(servers, users);
-        UserSolution s = ru.branchAndBound();
-        System.out.println("BNB: Equity: " + s.getEquity() + ", Distancia: " + s.getDistTotal());
-        for (Server sv:s.getServers()) {
-            System.out.println("Server " + sv.getId() + ": " + sv.getLoad());
-            for (User u:sv.getUsers()) {
-                System.out.println("\t" + u.getUsername()+ ": " + u.getActivity());
-            }
-        }
-
-        System.out.println();
-
-        UserSolution s1 = ru.greedy();
-        System.out.println("Greedy: Equity: " + s1.getEquity() + ", Distancia: " + s1.getDistTotal());
-        for (Server sv:s1.getServers()) {
-            System.out.println("Server " + sv.getId() + ": " + sv.getLoad());
-            for (User u:sv.getUsers()) {
-                System.out.println("\t" + u.getUsername()+ ": " + u.getActivity());
-            }
-        }
-
-        System.out.println();
-
-        UserSolution s2 = ru.backtracking(null, null, null, true);
-        System.out.println("BT: Equity: " + s2.getEquity() + ", Distancia: " + s2.getDistTotal());
-        for (Server sv:s2.getServers()) {
-            System.out.println("Server " + sv.getId() + ": " + sv.getLoad());
-            for (User u:sv.getUsers()) {
-                System.out.println("\t" + u.getUsername()+ ": " + u.getActivity());
-            }
-        }
-        if (true) {
-            return;
+        repartirUsuaris = new RepartirUsuaris(servers, users);
+        serverIds = new int[servers.length];
+        for (int i = 0; i < servers.length; i++) {
+            serverIds[i] = servers[i].getId();
         }
 
         while (true) {
@@ -83,89 +54,333 @@ class Main {
     }
 
     private static void bt() {
-        Backtracking bt = new Backtracking(nodes, servers, 1, 4);
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("usuaris.txt"));
 
-        Solution s = bt.fiabilitat(null, null);
-        System.out.println(s.getBound());
-        System.out.println("kk");
-        for (Node n : s.getPath()) {
-            System.out.println(n.getId());
-        }
+            System.out.println("\nRepartint usuaris...");
 
-        Solution s2 = bt.cost(null, null);
-        System.out.println(s2.getBound());
-        System.out.println("kk");
-        for (Node n : s2.getPath()) {
-            System.out.println(n.getId());
+            long startTime = System.currentTimeMillis();
+            UserSolution us = repartirUsuaris.backtracking(null, null, null, true);
+
+            bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
+            for (Server s:us.getServers()) {
+                bw.write("Server " + s.getId() + ":\n");
+                for (User u:s.getUsers()) {
+                    bw.write("\t" + u.getUsername() + "\n");
+                }
+            }
+
+            System.out.println("S'han repartit els usuaris en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+            bw = new BufferedWriter(new FileWriter("camins.txt"));
+
+            System.out.println("\nCalculant camins...");
+
+            startTime = System.currentTimeMillis();
+
+            for (int i = 0; i < servers.length; ++i) {
+                for (int j = i + 1; j < servers.length; ++j) {
+                    Backtracking bt = new Backtracking(nodes, servers, serverIds[i], serverIds[j]);
+                    bw.write("Cami " + serverIds[i] + " <-> " + serverIds[j] + ":\n");
+
+                    Solution s = bt.fiabilitat(null, null);
+                    bw.write("\tFiabilitat: " + s.getBound() + "\n");
+                    bw.write("\tPath: ");
+                    for (int k = 1; k < s.getPath().size() - 1; ++k) {
+                        if (k == s.getPath().size() - 2) {
+                            bw.write(s.getPath().get(k).getId() + "\n");
+                        } else {
+                            bw.write(s.getPath().get(k).getId() + " -> ");
+                        }
+                    }
+
+                    Solution s2 = bt.cost(null, null);
+                    bw.write("\tCost: " + s2.getBound() + "\n");
+                    bw.write("\tPath: ");
+                    for (int k = 1; k < s2.getPath().size() - 1; ++k) {
+                        if (k == s2.getPath().size() - 2) {
+                            bw.write(s2.getPath().get(k).getId() + "\n");
+                        } else {
+                            bw.write(s2.getPath().get(k).getId() + " -> ");
+                        }
+                    }
+                }
+            }
+
+            System.out.println("S'han calculat els camins en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+        } catch (IOException e) {
+            System.out.println("No s'ha pogut crear un dels fitxers!");
         }
     }
 
     private static void bnb() {
-        BranchAndBound bnb = new BranchAndBound(nodes, servers, 3, 4);
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("usuaris.txt"));
 
-        Solution s = bnb.fiabilitat(null);
-        System.out.println(s.getBound());
-        System.out.println("kk");
-        for (Node n : s.getPath()) {
-            System.out.println(n.getId());
-        }
+            System.out.println("\nRepartint usuaris...");
 
-        Solution s2 = bnb.cost(null);
-        System.out.println(s2.getBound());
-        System.out.println("kk");
-        for (Node n : s2.getPath()) {
-            System.out.println(n.getId());
+            long startTime = System.currentTimeMillis();
+            UserSolution us = repartirUsuaris.branchAndBound(-1);
+
+            bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
+            for (Server s:us.getServers()) {
+                bw.write("Server " + s.getId() + ":\n");
+                for (User u:s.getUsers()) {
+                    bw.write("\t" + u.getUsername() + "\n");
+                }
+            }
+
+            System.out.println("S'han repartit els usuaris en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+            bw = new BufferedWriter(new FileWriter("camins.txt"));
+
+            System.out.println("\nCalculant camins...");
+
+            startTime = System.currentTimeMillis();
+            for (int i = 0; i < servers.length; ++i) {
+                for (int j = i + 1; j < servers.length; ++j) {
+                    BranchAndBound bnb = new BranchAndBound(nodes, servers, serverIds[i], serverIds[j]);
+
+                    Solution s = bnb.fiabilitat(null);
+                    Solution s2 = bnb.cost(null);
+
+                    bw.write("Cami " + serverIds[i] + " <-> " + serverIds[j] + ":\n");
+                    bw.write("\tFiabilitat: " + s.getBound() + "\n");
+                    bw.write("\tPath: ");
+                    for (int k = 1; k < s.getPath().size() - 1; ++k) {
+                        if (k == s.getPath().size() - 2) {
+                            bw.write(s.getPath().get(k).getId() + "\n");
+                        } else {
+                            bw.write(s.getPath().get(k).getId() + " -> ");
+                        }
+                    }
+                    bw.write("\tCost: " + s2.getBound() + "\n");
+                    bw.write("\tPath: ");
+                    for (int k = 1; k < s2.getPath().size() - 1; ++k) {
+                        if (k == s2.getPath().size() - 2) {
+                            bw.write(s2.getPath().get(k).getId() + "\n");
+                        } else {
+                            bw.write(s2.getPath().get(k).getId() + " -> ");
+                        }
+                    }
+                }
+            }
+
+            System.out.println("S'han calculat els camins en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+        } catch (IOException e) {
+            System.out.println("No s'ha pogut crear un dels fitxers!");
         }
     }
 
     private static void g() {
-        Greedy g = new Greedy(nodes, servers, 1, 5);
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("usuaris.txt"));
 
-        Solution s = g.fiabilitat();
-        if (s == null) {
-            System.out.println("No s'ha trobat cap solucio.");
-        } else {
-            System.out.println(s.getBound());
-            System.out.println("kk");
-            for (Node n : s.getPath()) {
-                System.out.println(n.getId());
-            }
-        }
+            System.out.println("\nRepartint usuaris...");
 
-        Solution s2 = g.cost();
-        if (s2 == null) {
-            System.out.println("No s'ha trobat cap solucio.");
-        } else {
-            System.out.println(s2.getBound());
-            System.out.println("kk");
-            for (Node n : s2.getPath()) {
-                System.out.println(n.getId());
+            long startTime = System.currentTimeMillis();
+            UserSolution us = repartirUsuaris.greedy();
+
+            bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
+            for (Server s:us.getServers()) {
+                bw.write("Server " + s.getId() + ":\n");
+                for (User u:s.getUsers()) {
+                    bw.write("\t" + u.getUsername() + "\n");
+                }
             }
+
+            System.out.println("S'han repartit els usuaris en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+            bw = new BufferedWriter(new FileWriter("camins.txt"));
+
+            System.out.println("\nCalculant camins...");
+
+            startTime = System.currentTimeMillis();
+            for (int i = 0; i < servers.length; ++i) {
+                for (int j = i + 1; j < servers.length; ++j) {
+                    Greedy g = new Greedy(nodes, servers, serverIds[i], serverIds[j]);
+
+                    Solution s = g.fiabilitat();
+                    Solution s2 = g.cost();
+
+                    bw.write("Cami " + serverIds[i] + " <-> " + serverIds[j] + ":\n");
+
+                    if (s != null) {
+                        bw.write("\tFiabilitat: " + s.getBound() + "\n");
+                        bw.write("\tPath: ");
+                        for (int k = 1; k < s.getPath().size() - 1; ++k) {
+                            if (k == s.getPath().size() - 2) {
+                                bw.write(s.getPath().get(k).getId() + "\n");
+                            } else {
+                                bw.write(s.getPath().get(k).getId() + " -> ");
+                            }
+                        }
+                    } else {
+                        bw.write("\tFiabilitat: Not found\n");
+                    }
+
+                    if (s2 != null) {
+                        bw.write("\tCost: " + s2.getBound() + "\n");
+                        bw.write("\tPath: ");
+                        for (int k = 1; k < s2.getPath().size() - 1; ++k) {
+                            if (k == s2.getPath().size() - 2) {
+                                bw.write(s2.getPath().get(k).getId() + "\n");
+                            } else {
+                                bw.write(s2.getPath().get(k).getId() + " -> ");
+                            }
+                        }
+                    } else {
+                        bw.write("\tCost: Not found\n");
+                    }
+                }
+            }
+
+            System.out.println("S'han calculat els camins en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+        } catch (IOException e) {
+            System.out.println("No s'ha pogut crear un dels fitxers!");
         }
     }
 
     private static void gbt() {
-        Greedy g = new Greedy(nodes, servers, 1, 5);
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("usuaris.txt"));
 
-        //Solution solFiabilitat = g.fiabilitat(1, 2);
-        //System.out.println(g.cost(1, 2).getBound());
+            System.out.println("\nRepartint usuaris...");
 
-        //Backtracking bt = new Backtracking(nodes, servers);
+            long startTime = System.currentTimeMillis();
+            UserSolution us = repartirUsuaris.greedy();
+            us = repartirUsuaris.backtracking(null, null, new double[] {us.getEquity()}, true);
 
-        //System.out.println(bt.fiabilitat(1, 2, null, solFiabilitat, null).getBound());
-        //System.out.println(bt.cost(2, new Solution(nodes[0], false), null).getBound());
+            bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
+            for (Server s:us.getServers()) {
+                bw.write("Server " + s.getId() + ":\n");
+                for (User u:s.getUsers()) {
+                    bw.write("\t" + u.getUsername() + "\n");
+                }
+            }
+
+            System.out.println("S'han repartit els usuaris en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+            bw = new BufferedWriter(new FileWriter("camins.txt"));
+
+            System.out.println("\nCalculant camins...");
+
+            startTime = System.currentTimeMillis();
+            for (int i = 0; i < servers.length; ++i) {
+                for (int j = i + 1; j < servers.length; ++j) {
+                    Greedy g = new Greedy(nodes, servers, serverIds[i], serverIds[j]);
+
+                    Solution s = g.fiabilitat();
+                    Solution s2 = g.cost();
+
+                    Backtracking bt = new Backtracking(nodes, servers, serverIds[i], serverIds[j]);
+                    s = bt.fiabilitat(null, s);
+                    s2 = bt.cost(null, s2);
+
+                    bw.write("Cami " + serverIds[i] + " <-> " + serverIds[j] + ":\n");
+                    bw.write("\tFiabilitat: " + s.getBound() + "\n");
+                    bw.write("\tPath: ");
+                    for (int k = 1; k < s.getPath().size() - 1; ++k) {
+                        if (k == s.getPath().size() - 2) {
+                            bw.write(s.getPath().get(k).getId() + "\n");
+                        } else {
+                            bw.write(s.getPath().get(k).getId() + " -> ");
+                        }
+                    }
+                    bw.write("\tCost: " + s2.getBound() + "\n");
+                    bw.write("\tPath: ");
+                    for (int k = 1; k < s2.getPath().size() - 1; ++k) {
+                        if (k == s2.getPath().size() - 2) {
+                            bw.write(s2.getPath().get(k).getId() + "\n");
+                        } else {
+                            bw.write(s2.getPath().get(k).getId() + " -> ");
+                        }
+                    }
+                }
+            }
+
+            System.out.println("S'han calculat els camins en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+        } catch (IOException e) {
+            System.out.println("No s'ha pogut crear un dels fitxers!");
+        }
     }
 
     private static void gbnb() {
-        //Greedy g = new Greedy(nodes, servers);
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("usuaris.txt"));
 
-        //Solution solFiabilitat = g.fiabilitat(1, 2);
-        //System.out.println(g.cost(1, 2).getBound());
+            System.out.println("\nRepartint usuaris...");
 
-        //BranchAndBound bnb = new BranchAndBound(nodes, servers);
+            long startTime = System.currentTimeMillis();
+            UserSolution us = repartirUsuaris.greedy();
 
-        //System.out.println(bnb.fiabilitat(1, 2, solFiabilitat).getBound());
-        //System.out.println(bnb.cost(1, 2, null).getBound());
+            bw.write("Equity: " + us.getEquity() + ", Distance: " + us.getDistTotal() + "\n");
+            for (Server s:us.getServers()) {
+                bw.write("Server " + s.getId() + ":\n");
+                for (User u:s.getUsers()) {
+                    bw.write("\t" + u.getUsername() + "\n");
+                }
+            }
+
+            System.out.println("S'han repartit els usuaris en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+            bw = new BufferedWriter(new FileWriter("camins.txt"));
+
+            System.out.println("\nCalculant camins...");
+
+            startTime = System.currentTimeMillis();
+            for (int i = 0; i < servers.length; ++i) {
+                for (int j = i + 1; j < servers.length; ++j) {
+                    Greedy g = new Greedy(nodes, servers, serverIds[i], serverIds[j]);
+
+                    Solution s = g.fiabilitat();
+                    Solution s2 = g.cost();
+
+                    BranchAndBound bnb = new BranchAndBound(nodes, servers, serverIds[i], serverIds[j]);
+                    s = bnb.fiabilitat(s);
+                    s2 = bnb.cost(s2);
+
+                    bw.write("Cami " + serverIds[i] + " <-> " + serverIds[j] + ":\n");
+                    bw.write("\tFiabilitat: " + s.getBound() + "\n");
+                    bw.write("\tPath: ");
+                    for (int k = 1; k < s.getPath().size() - 1; ++k) {
+                        if (k == s.getPath().size() - 2) {
+                            bw.write(s.getPath().get(k).getId() + "\n");
+                        } else {
+                            bw.write(s.getPath().get(k).getId() + " -> ");
+                        }
+                    }
+                    bw.write("\tCost: " + s2.getBound() + "\n");
+                    bw.write("\tPath: ");
+                    for (int k = 1; k < s2.getPath().size() - 1; ++k) {
+                        if (k == s2.getPath().size() - 2) {
+                            bw.write(s2.getPath().get(k).getId() + "\n");
+                        } else {
+                            bw.write(s2.getPath().get(k).getId() + " -> ");
+                        }
+                    }
+                }
+            }
+
+            System.out.println("S'han calculat els camins en " + (System.currentTimeMillis() - startTime) + "ms");
+            bw.close();
+
+        } catch (IOException e) {
+            System.out.println("No s'ha pogut crear un dels fitxers!");
+        }
     }
 
     private static int getOption() {

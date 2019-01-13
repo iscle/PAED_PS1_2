@@ -23,23 +23,11 @@ class ServerMinus {
         return country;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public double[] getLocation() {
         return location;
     }
 
-    public void setLocation(double[] location) {
-        this.location = location;
-    }
-
     public int getReachable_from() {
         return reachable_from;
-    }
-
-    public void setReachable_from(int reachable_from) {
-        this.reachable_from = reachable_from;
     }
 }

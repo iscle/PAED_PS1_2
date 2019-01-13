@@ -32,6 +32,10 @@ class Server {
         this.id = id;
     }
 
+    public double[] getLocation() {
+        return location;
+    }
+
     public String getCountry() {
         return country;
     }
@@ -40,20 +44,28 @@ class Server {
         this.country = country;
     }
 
-    public double[] getLocation() {
-        return location;
-    }
-
     public void setLocation(double[] location) {
         this.location = location;
     }
 
-    public int[] getReachable_from() {
-        return reachable_from;
-    }
-
     public void setReachable_from(int[] reachable_from) {
         this.reachable_from = reachable_from;
+    }
+
+    public double getActivity() {
+        return activity;
+    }
+
+    public void setActivity(double activity) {
+        this.activity = activity;
+    }
+
+    public void setUsers(ArrayList<User> users) {
+        this.users = users;
+    }
+
+    public int[] getReachable_from() {
+        return reachable_from;
     }
 
     public double getLoad() {

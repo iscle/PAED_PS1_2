@@ -8,10 +8,14 @@ class Backtracking {
     private final Node endServer;
 
     public Backtracking(Node[] nodes, Server[] servers, int startServer, int endServer) {
-        this.nodes = new ArrayList<>(Arrays.asList(nodes));
+        Node[] nclone = new Node[nodes.length];
+        for (int i = 0; i < nodes.length; ++i) {
+            nclone[i] = new Node(nodes[i]);
+        }
+        this.nodes = new ArrayList<>(Arrays.asList(nclone));
 
         // Convert server1 to node
-        Server server1 = getServerById(servers, startServer);
+        Server server1 = new Server(getServerById(servers, startServer));
         NodeConnection[] startNodeConnections = new NodeConnection[server1.getReachable_from().length];
 
         for (int i = 0; i < startNodeConnections.length; ++i) {
@@ -21,7 +25,7 @@ class Backtracking {
         this.startServer = new Node(-1, 1, startNodeConnections);
 
         // Convert server2 to node
-        Server server2 = getServerById(servers, endServer);
+        Server server2 = new Server(getServerById(servers, endServer));
         NodeConnection[] endNodeConnections = new NodeConnection[server2.getReachable_from().length];
 
         for (int i = 0; i < endNodeConnections.length; ++i) {

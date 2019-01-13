@@ -6,7 +6,7 @@ public class RepartirUsuaris {
     private final User[] users;
 
     public RepartirUsuaris(Server[] servers, User[] users) {
-        this.servers = servers;
+        this.servers = servers.clone();
         this.users = users.clone();
         for (User user : this.users) {
             Post[] posts = user.getPosts();
@@ -31,7 +31,7 @@ public class RepartirUsuaris {
         }
 
         if (isSolution(s)) {
-            if (isPromisingBt(s, minEquity[0])) {
+            if (isPromising(s, minEquity[0])) {
                 solutions.add(s);
 
                 if (minEquity[0] == -1 || s.getEquity() < minEquity[0]) {
@@ -40,7 +40,7 @@ public class RepartirUsuaris {
 
 
                 for (int i = 0; i < solutions.size(); ++i) {
-                    if (!isPromisingBt(solutions.get(i), minEquity[0])) {
+                    if (!isPromising(solutions.get(i), minEquity[0])) {
                         solutions.remove(i);
                         --i;
                     }
@@ -72,7 +72,7 @@ public class RepartirUsuaris {
         }
     }
 
-    private boolean isPromisingBt(UserSolution option, double minEquity) {
+    private boolean isPromising(UserSolution option, double minEquity) {
         if (minEquity == -1) {
             return true;
         } else {
@@ -80,10 +80,9 @@ public class RepartirUsuaris {
         }
     }
 
-    UserSolution branchAndBound() {
+    UserSolution branchAndBound(double minEquity) {
         PriorityQueue<UserSolution> liveNodes = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getEquity(), o2.getEquity()));
-        PriorityQueue<UserSolution> solutions = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getDistTotal(), o2.getDistTotal()));
-        double minEquity = -1;
+        ArrayList<UserSolution> solutions = new ArrayList<>();
         UserSolution x = new UserSolution(servers);
 
         liveNodes.add(x);
@@ -92,38 +91,44 @@ public class RepartirUsuaris {
             x = liveNodes.poll();
             ArrayList<UserSolution> options = expand(x);
 
-            for (UserSolution option : options) {
-                if (isSolution(option)) {
-                    if (minEquity == -1 || minEquity > option.getEquity()) {
-                        minEquity = option.getEquity();
-                    }
+            for (UserSolution s : options) {
+                if (isSolution(s)) {
+                    if (isPromising(s, minEquity)) {
+                        solutions.add(s);
 
-                    solutions.add(option);
-                } else if (isPromisingBnb(option, minEquity)) {
-                    liveNodes.add(option);
+                        if (minEquity == -1 || s.getEquity() < minEquity) {
+                            minEquity = s.getEquity();
+                        }
+
+
+                        for (int i = 0; i < solutions.size(); ++i) {
+                            if (!isPromising(solutions.get(i), minEquity)) {
+                                solutions.remove(i);
+                                --i;
+                            }
+                        }
+                    }
+                } else  {
+                    liveNodes.add(s);
                 }
             }
         }
 
-        for (UserSolution us:solutions) {
-            if (us.getEquity() <= minEquity * 1.1) {
-                return us;
+        UserSolution best = null;
+        for (UserSolution us : solutions) {
+            if (best == null) {
+                best = us;
+            } else {
+                if (best.getDistTotal() > us.getDistTotal()) {
+                    best = us;
+                }
             }
         }
-
-        return null;
+        return best;
     }
 
     private boolean isSolution(UserSolution option) {
         return option.getTotalUsers() == users.length;
-    }
-
-    private boolean isPromisingBnb(UserSolution option, double minEquity) {
-        if (minEquity == -1) {
-            return true;
-        } else {
-            return option.getEquity() <= minEquity * 1.1;
-        }
     }
 
     ArrayList<UserSolution> expand(UserSolution us) {
