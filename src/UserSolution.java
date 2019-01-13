@@ -1,55 +1,50 @@
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class UserSolution {
-    HashMap<User, Server> combination;
+    Server[] servers;
     double equity;
     int distTotal;
     User nextUser;
 
-    public UserSolution(HashMap<User, Server> combination, int equity, int distTotal, User nextUser) {
-        this.combination = combination;
+    public UserSolution(Server[] servers, int equity, int distTotal, User nextUser) {
+        this.servers = servers;
         this.equity = equity;
         this.distTotal = distTotal;
         this.nextUser = nextUser;
     }
 
-    public UserSolution(UserSolution u) {
-        this.combination = (HashMap) u.combination.clone();
-        this.equity = u.equity;
-        this.distTotal = u.distTotal;
-        this.nextUser = u.nextUser;
-    }
-
-    public UserSolution(User user) {
-        this.combination = new HashMap<>();
-        this.equity = 0;
-        this.distTotal = 0;
-        this.nextUser = user;
-    }
-
-    public UserSolution() {
-        this.combination = new HashMap<>();
+    public UserSolution(Server[] servers) {
+        this.servers = servers;
         this.equity = 0;
         this.distTotal = 0;
         this.nextUser = null;
     }
 
+    public UserSolution(UserSolution u) {
+        this.servers = u.servers.clone();
+        this.equity = u.equity;
+        this.distTotal = u.distTotal;
+        this.nextUser = u.nextUser;
+    }
+
     public void add(User user, Server server) {
-        combination.put(user, server);
+        int indexOfServer = indexOfServer(server);
+        servers[indexOfServer].addUser(user);
         equity = maxServer() - minServer();
-        distTotal += getDistance(server.getLocation()[0], server.getLocation()[1], user.getPosts()[0].getLocation()[0], user.getPosts()[0].getLocation()[1]);
+        distTotal += getDistance(servers[indexOfServer].getLocation()[0], servers[indexOfServer].getLocation()[1], user.getPosts()[0].getLocation()[0], user.getPosts()[0].getLocation()[1]);
     }
 
     public void remove(User user, Server server) {
-        combination.remove(user, server);
+        int indexOfServer = indexOfServer(server);
+        distTotal -= getDistance(servers[indexOfServer].getLocation()[0], servers[indexOfServer].getLocation()[1], user.getPosts()[0].getLocation()[0], user.getPosts()[0].getLocation()[1]);
         equity -= user.getActivity();
-        distTotal -= getDistance(server.getLocation()[0], server.getLocation()[1], user.getPosts()[0].getLocation()[0], user.getPosts()[0].getLocation()[1]);
+        servers[indexOfServer].removeUser(user);
     }
 
     public double minServer() {
         double min = -1;
 
-        for (Server sv:combination.values()) {
+        for (Server sv:servers) {
             if (min == -1) {
                 min = sv.getLoad();
             } else {
@@ -65,7 +60,7 @@ public class UserSolution {
     public double maxServer() {
         double max = -1;
 
-        for (Server sv:combination.values()) {
+        for (Server sv:servers) {
             if (max == -1) {
                 max = sv.getLoad();
             } else {
@@ -76,6 +71,16 @@ public class UserSolution {
         }
 
         return max;
+    }
+
+    public int indexOfServer(Server s) {
+        for (int i = 0; i < servers.length; ++i) {
+            if (servers[i] == s) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     /**
@@ -102,12 +107,16 @@ public class UserSolution {
         return rad * c;
     }
 
-    public HashMap<User, Server> getCombination() {
-        return combination;
+    public Server[] getServers() {
+        return servers;
     }
 
-    public void setCombination(HashMap<User, Server> combination) {
-        this.combination = combination;
+    public void setServers(Server[] servers) {
+        this.servers = servers;
+    }
+
+    public void setEquity(double equity) {
+        this.equity = equity;
     }
 
     public double getEquity() {

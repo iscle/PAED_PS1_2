@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class RepartirUsuaris {
@@ -20,9 +21,10 @@ public class RepartirUsuaris {
         }
     }
 
+    /*
+
     UserSolution branchAndBound() {
         PriorityQueue<UserSolution> liveNodes = new PriorityQueue<>(11, (o1, o2) -> Double.compare(o1.getEquity(), o2.getEquity()));
-        ArrayList<UserSolution> options;
         Server[] servers = this.servers.clone();
         UserSolution best = null;
 
@@ -32,7 +34,7 @@ public class RepartirUsuaris {
 
         while (liveNodes.size() > 0) {
             x = liveNodes.poll();
-            options = expand(servers, x);
+            ArrayList<UserSolution> options = expand(servers, x);
 
             for (Solution option:options) {
                 if (isSolution(option)) {
@@ -59,26 +61,28 @@ public class RepartirUsuaris {
         return solutions;
 
     }
+    */
 
     UserSolution greedy() {
         User[] users = this.users.clone();
-        Server[] servers = this.servers.clone();
-        UserSolution s = new UserSolution();
+        Server[] servers = this.servers;
+        UserSolution s = new UserSolution(servers);
 
         Arrays.sort(users, (o1, o2) -> Double.compare(o2.getActivity(), o1.getActivity()));
 
         ArrayList<User> candidats = new ArrayList<>(Arrays.asList(users));
 
         while (candidats.size() > 0) {
-            servers[0].addLoad(candidats.get(0).getActivity());
             s.add(candidats.get(0), servers[0]);
             candidats.remove(0);
-            Arrays.sort(servers, new Comparator<Server>() {
+            Server[] solSer = s.getServers();
+            Arrays.sort(solSer, new Comparator<Server>() {
                 @Override
                 public int compare(Server o1, Server o2) {
                     return Double.compare(o1.getLoad(), o2.getLoad());
                 }
             });
+            servers = solSer;
         }
 
         return s;

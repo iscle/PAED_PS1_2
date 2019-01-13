@@ -25,7 +25,14 @@ class Main {
         System.out.println("\tUsers: " + users.length);
 
         RepartirUsuaris ru = new RepartirUsuaris(servers, users);
-        System.out.println(ru.greedy().equity);
+        UserSolution s = ru.greedy();
+        System.out.println(s.equity);
+        for (Server sv:s.getServers()) {
+            System.out.println("Server " + sv.getId() + ": " + sv.getLoad());
+            for (User u:sv.getUsers()) {
+                System.out.println("\t" + u.getUsername()+ ": " + u.getActivity());
+            }
+        }
         if (true) {
             return;
         }
@@ -187,6 +194,10 @@ class Main {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return false;
+        }
+
+        for (Server s:servers) {
+            s.prepare();
         }
 
         return true;

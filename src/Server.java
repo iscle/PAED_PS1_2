@@ -1,16 +1,18 @@
+import java.util.ArrayList;
+
 class Server {
     private int id;
     private String country;
     private double[] location;
     private int[] reachable_from;
     private double activity;
+    private ArrayList<User> users;
 
     public Server(int id, String country, double[] location, int[] reachable_from) {
         this.id = id;
         this.country = country;
         this.location = location;
         this.reachable_from = reachable_from;
-        this.activity = 0;
     }
 
     public int getId() {
@@ -45,15 +47,26 @@ class Server {
         this.reachable_from = reachable_from;
     }
 
-    public void addLoad(double load) {
-        activity += load;
-    }
-
-    public void removeLoad(double load) {
-        activity -= load;
-    }
-
     public double getLoad() {
         return activity;
+    }
+
+    public ArrayList<User> getUsers() {
+        return users;
+    }
+
+    public void prepare() {
+        this.activity = 0;
+        this.users = new ArrayList<>();
+    }
+
+    public void addUser(User u) {
+        users.add(u);
+        activity += u.getActivity();
+    }
+
+    public void removeUser(User u) {
+        users.remove(u);
+        activity -= u.getActivity();
     }
 }
