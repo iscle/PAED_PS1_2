@@ -24,6 +24,12 @@ class Main {
         System.out.println("\tServers: " + servers.length);
         System.out.println("\tUsers: " + users.length);
 
+        RepartirUsuaris ru = new RepartirUsuaris(servers, users);
+        System.out.println(ru.greedy().equity);
+        if (true) {
+            return;
+        }
+
         while (true) {
             switch (getOption()) {
                 case 1: // Backtracking

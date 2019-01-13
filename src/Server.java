@@ -3,12 +3,14 @@ class Server {
     private String country;
     private double[] location;
     private int[] reachable_from;
+    private double activity;
 
     public Server(int id, String country, double[] location, int[] reachable_from) {
         this.id = id;
         this.country = country;
         this.location = location;
         this.reachable_from = reachable_from;
+        this.activity = 0;
     }
 
     public int getId() {
@@ -41,5 +43,17 @@ class Server {
 
     public void setReachable_from(int[] reachable_from) {
         this.reachable_from = reachable_from;
+    }
+
+    public void addLoad(double load) {
+        activity += load;
+    }
+
+    public void removeLoad(double load) {
+        activity -= load;
+    }
+
+    public double getLoad() {
+        return activity;
     }
 }
